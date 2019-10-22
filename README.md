@@ -28,9 +28,11 @@ case).
 
 - [SparkFun Thing Plus][sparkfun-thing-plus]
 - [Serial comm on Linux][linux-serial-comm]
+- [Info about BLE and gatttool][gatttool]
 
 [linux-serial-comm]:https://www.cyberciti.biz/hardware/5-linux-unix-commands-for-connecting-to-the-serial-console/
 [sparkfun-thing-plus]:https://learn.sparkfun.com/tutorials/esp32-thing-plus-hookup-guide
+[gatttool]:https://www.jaredwolff.com/get-started-with-bluetooth-low-energy/
 
 ## The plan
 
@@ -39,7 +41,20 @@ case).
 - [x] Configuration for "acceptable min/max illuminance" and "LED behavior",
   s.t. the on-board LED either turns on, turns off, or blinks when the light
   level is acceptable (or unacceptable)
-- [ ] BLE server w/ real-time output
+- [x] BLE server w/ real-time output
 - [ ] Storage of metrics (one datapoint at variable rates based on recency --
   every sec for the last min, and every 15min after that) long-term trends
 - [ ] (Stretch goal) a way to output a graph from the metrics
+
+
+## Behavior
+
+### Bluetooth
+
+This sketch exposes a BLE peripheral (server) that sends notifications each
+containing a field of the current datapoint and comprising a pair of 4-byte
+integers of the format `<FIELD_ID> <FIELD_VALUE>`. Much is written about BLE,
+but it's hard to find a concise explanation that gives guarantees about data
+transfer; as a precaution, the datapoints encode a schema version in the
+`DP_BEGIN_VERSION (0x00)` field and the number of internal fields in the
+`DP_END_LENGTH (0xFF)` field.
