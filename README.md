@@ -28,9 +28,11 @@ case).
 
 - [SparkFun Thing Plus][sparkfun-thing-plus]
 - [Serial comm on Linux][linux-serial-comm]
+- [Info about BLE and gatttool][gatttool]
 
 [linux-serial-comm]:https://www.cyberciti.biz/hardware/5-linux-unix-commands-for-connecting-to-the-serial-console/
 [sparkfun-thing-plus]:https://learn.sparkfun.com/tutorials/esp32-thing-plus-hookup-guide
+[gatttool]:https://www.jaredwolff.com/get-started-with-bluetooth-low-energy/
 
 ## The plan
 
