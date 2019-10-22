@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include "SparkFun_VEML6030_Ambient_Light_Sensor.h"
 
+#define LED_PIN 13
 #define AL_ADDR 0x48
 #define GAIN_SETTING .125 /* Possible values: .125; .25; 1 (unsafe); 2 (unsafe) */
 #define INTEGRATION_MS_SETTING 800 /* Possible values: 25; 50; 100; 200; 400; 800; */
@@ -9,7 +10,11 @@
 #define POLL_BACKOFF_MS     1000 /* how much to increase the poll duration when backing off */
 #define POLL_DEFAULT_MS     1000 /* the default polling rate with zero backoff */
 #define POLL_MAX_MS        10000 /* the maximum polling rate when fully backed-off */
-#define POLL_FUZZ_LUX         30 /* the minimum cumulative change in lux before polling backoff resets */
+#define POLL_FUZZ_LUX         10 /* the minimum cumulative change in lux before polling backoff resets */
+
+#define MIN_LUX        80
+#define MAX_LUX       120
+#define LED_BEHAVIOR   -1   /* 0: disabled; 1: flashes when unacceptable; -1: flashes when acceptable; */
 
 SparkFun_Ambient_Light light(AL_ADDR);
 
@@ -19,6 +24,7 @@ struct PollInfo {
 };
 
 void setup(){
+  pinMode(LED_PIN, OUTPUT);
   Wire.begin();
   Serial.begin(115200);
   configureLightSensor();
@@ -37,10 +43,12 @@ void configureLightSensor() {
 void loop(){
   long luxVal = light.readLight(); 
   struct PollInfo pollInfo = getPollDelay(luxVal);
+  int luxAcceptability = isLuxValueAcceptable(luxVal);
 
   Serial.printf(
-    "Ambient Light Reading:\n\t%-15s%d lux (%.2f foot-candles)\n\t%-15s%s\n\t%-15s%dms\n", 
-    "Luminance: ", luxVal, luxToFootCandles(luxVal), 
+    "Ambient Light Reading:\n\t%-15s%s\n\t%-15s%d lux (%.2f foot-candles)\n\t%-15s%s\n\t%-15s%dms\n", 
+    "Status: ", luxAcceptability < 0 ? "TOO LOW" : luxAcceptability > 0 ? "TOO HIGH" : "OK",
+    "Illuminance: ", luxVal, luxToFootCandles(luxVal), 
     "Light changed: ", pollInfo.didLightChange ? "yes" : "no", 
     "Next poll: ", pollInfo.pollDelay);
     
@@ -63,4 +71,11 @@ struct PollInfo getPollDelay(long luxValue) {
 
   // don't set lastLuxVal, since that was the last measurement we really counted
   return ((struct PollInfo) {false, lastPollDelay = min<long>(lastPollDelay + POLL_BACKOFF_MS, POLL_MAX_MS) });
+}
+
+int isLuxValueAcceptable(long luxValue) {
+  int cmp = luxValue < MIN_LUX ? -1 : luxValue > MAX_LUX ? 1 : 0;
+  int ledValue = cmp == 0 ? LED_BEHAVIOR == -1 ? HIGH : LOW : HIGH;
+  digitalWrite(LED_PIN, ledValue);
+  return cmp;
 }
