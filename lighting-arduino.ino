@@ -50,10 +50,12 @@ enum DatapointProperty {
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
+      Serial.println("BLE device connected!");
       deviceConnected = true;
     };
 
     void onDisconnect(BLEServer* pServer) {
+      Serial.println("BLE device disconnected!");
       deviceConnected = false;
     }
 };
@@ -87,8 +89,7 @@ void configureBluetoothServer() {
                       BLE_CHARACTERISTIC_UUID,
                       BLECharacteristic::PROPERTY_READ   |
                       BLECharacteristic::PROPERTY_WRITE  |
-                      BLECharacteristic::PROPERTY_NOTIFY |
-                      BLECharacteristic::PROPERTY_INDICATE
+                      BLECharacteristic::PROPERTY_NOTIFY
                     );
 
   // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
@@ -97,10 +98,12 @@ void configureBluetoothServer() {
   pService->start();
 
   // Start advertising
+  /*
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(BLE_SERVICE_UUID);
   pAdvertising->setScanResponse(false);
   pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
+  */
   BLEDevice::startAdvertising();
 }
 
@@ -170,9 +173,9 @@ void serializeDatapoint(long luxValue, long minLuxValue, long maxLuxValue, long 
     {(long)DP_END_LENGTH, 4}
   };
   
-  for (int i = 0; i == 0 || datapoints[i-1][0] != DP_END; i++) {
+  for (int i = 0; i == 0 || datapoints[i-1][0] != DP_END_LENGTH; i++) {
     pCharacteristic->setValue((uint8_t*)(datapoints[i]), 2*sizeof(long)/(sizeof(uint8_t)));
     pCharacteristic->notify();
-    delay(3);
+    delay(10);
   }
 }

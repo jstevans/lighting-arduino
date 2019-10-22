@@ -58,3 +58,25 @@ but it's hard to find a concise explanation that gives guarantees about data
 transfer; as a precaution, the datapoints encode a schema version in the
 `DP_BEGIN_VERSION (0x00)` field and the number of internal fields in the
 `DP_END_LENGTH (0xFF)` field.
+
+*I'm not an expert in Bluetooth, so will not get the jargon right. Please
+open an issue or PR to correct any terminological impropriety!*
+
+In order to get the BLE server to broadcast notifications, it's necessary to
+discover and set the characteristic's CCC attribute to notify:
+
+```bash #Find the bluetooth device address hcitool lescan 
+
+# List all characteristics; here, you can see the service's UUID
+gatttool -b <DEVICE ADDRESS> --characteristics 
+
+# List service characteristic values (and their associated handles)
+gatttool -b <DEVICE ADDRESS> --char-read-uuid <SERVICE UUID>
+
+# Discover 2902 CCC attributes for a characteristic
+gatttool -b <DEVICE ADDRESS> --char-read-uuid 2902 <CHARACTERISTIC HANDLE>
+
+# Write 0100 `enable notifications` to the 2902 CCC attribute for our
+# characteristic, and then listen for notifications
+gatttool -b <DEVICE ADDRESS> --char-write-req <2902 CCC HANDLE> 0100 --listen
+```
