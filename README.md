@@ -36,7 +36,7 @@ case).
 
 - [x] Serial output of the current illuminance, with support for configurable
   linear backoff polling to conserve energy
-- [ ] Configuration for "acceptable min/max illuminance" and "LED behavior",
+- [x] Configuration for "acceptable min/max illuminance" and "LED behavior",
   s.t. the on-board LED either turns on, turns off, or blinks when the light
   level is acceptable (or unacceptable)
 - [ ] BLE server w/ real-time output
